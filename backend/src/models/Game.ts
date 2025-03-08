@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IGame extends Document {
-  board: string[]; 
+  board: string[][]; 
   currentPlayer: string; 
   winner: string | null; 
   status: "in_progress" | "finished"; 

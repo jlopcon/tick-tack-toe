@@ -5,6 +5,10 @@ This project is a full-stack Tic Tac Toe game built with Next.js for the fronten
 
 ## Installation
 
+## **Database Setup (MongoDB)**
+This project uses MongoDB as the database. Before running the backend, make sure MongoDB is installed and running on your machine.
+
+
 ### Backend
 1. Navigate to the backend directory:
    - cd backend
