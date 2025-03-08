@@ -10,7 +10,7 @@ export interface IGame extends Document {
 
 const GameSchema = new Schema<IGame>(
   {
-    board: { type: [String], required: true }, 
+    board: { type: [[String]], required: true }, 
     currentPlayer: { type: String, required: true }, 
     winner: { type: String, default: null }, 
     status: { type: String, enum: ["in_progress", "finished"], required: true },
