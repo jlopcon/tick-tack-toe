@@ -9,3 +9,10 @@ export interface BoardProps {
   board: Board;
   onClick: (row: number, col: number) => void;
 }
+
+export interface RankingData {
+  player: string;
+  wins: number;
+  losses: number;
+  draws: number;
+}
