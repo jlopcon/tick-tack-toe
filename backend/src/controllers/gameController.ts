@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import Game from "../models/Game";
-import { checkWinner } from "../utils/gameLogic";
+import { checkWinner, getAIMove } from "../utils/gameLogic";
 
 export const createGame = async (req: Request, res: Response) => {
     try {
@@ -21,7 +21,7 @@ export const getGames = async (req: Request, res: Response) => {
     }
 };
 
-export const makeMove: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const makeMove = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { player, row, col } = req.body;
 
@@ -46,10 +46,28 @@ export const makeMove: RequestHandler = async (req: Request, res: Response): Pro
         game.board[row][col] = player;
         game.currentPlayer = player === "X" ? "O" : "X";
 
-        const winner = checkWinner(game.board);
-        if (winner) {
+        let result = checkWinner(game.board);
+        if (result) {
             game.status = "finished";
-            game.winner = winner;
+            game.winner = result === "draw" ? null : result;
+            await game.save();
+            res.status(200).json(game);
+            return;
+        }
+
+        
+        if (game.currentPlayer === "O") { // la IA es "O"
+            const aiMove = getAIMove(game.board, "O");
+            if (aiMove) {
+                game.board[aiMove.row][aiMove.col] = "O";
+                game.currentPlayer = "X"; // Cambiar el turno
+
+                result = checkWinner(game.board);
+                if (result) {
+                    game.status = "finished";
+                    game.winner = result === "draw" ? null : result;
+                }
+            }
         }
 
         await game.save();

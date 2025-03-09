@@ -21,5 +21,51 @@ export const checkWinner = (board: string[][]): string | null => {
         return board[0][2];  
     }
 
-    return null;  // No hay ganador
+    // Comprobar si el tablero está lleno (empate)
+    if (board.flat().every(cell => cell !== "")) {
+        return "draw"; 
+    }
+
+    return null;  // No hay ganador ni empate
+};
+
+export const getAIMove = (board: string[][], aiPlayer: string): { row: number, col: number } | null => {
+    const opponent = aiPlayer === "X" ? "O" : "X";
+
+    const findWinningMove = (player: string) => {
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+                if (board[row][col] === "") {
+                    board[row][col] = player;
+                    if (checkWinner(board) === player) {
+                        board[row][col] = ""; 
+                        return { row, col };
+                    }
+                    board[row][col] = ""; 
+                }
+            }
+        }
+        return null;
+    };
+
+    
+    let move = findWinningMove(aiPlayer);
+    if (move) return move;
+
+    move = findWinningMove(opponent);
+    if (move) return move;
+
+    //Jugar en el centro 
+    if (board[1][1] === "") return { row: 1, col: 1 };
+
+    //Cualquiera
+    for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+            if (board[row][col] === "") {
+                return { row, col };
+            }
+        }
+    }
+
+    return null; 
 };
