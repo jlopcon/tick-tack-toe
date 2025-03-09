@@ -69,3 +69,7 @@ export const getAIMove = (board: string[][], aiPlayer: string): { row: number, c
 
     return null; 
 };
+
+export const isBoardFull = (board: string[][]): boolean => {
+    return board.every(row => row.every(cell => cell !== ""));
+};

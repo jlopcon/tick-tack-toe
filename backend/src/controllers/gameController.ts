@@ -1,6 +1,7 @@
-import { Request, RequestHandler, Response } from "express";
+import { Request, Response } from "express";
 import Game from "../models/Game";
-import { checkWinner, getAIMove } from "../utils/gameLogic";
+import { checkWinner, getAIMove, isBoardFull } from "../utils/gameLogic";
+import { updateRanking } from "./rankingController";
 
 export const createGame = async (req: Request, res: Response) => {
     try {
@@ -50,22 +51,36 @@ export const makeMove = async (req: Request, res: Response): Promise<void> => {
         if (result) {
             game.status = "finished";
             game.winner = result === "draw" ? null : result;
+
+            await updateRanking(result === "X" ? "human" : "ai", result === "draw" ? "draw" : "win");
+            await updateRanking(player === "X" ? "ai" : "human", result === "draw" ? "draw" : "loss");
             await game.save();
             res.status(200).json(game);
             return;
         }
 
-        
+        if (isBoardFull(game.board)) {
+            game.status = "finished";
+            game.winner = null;
+            await updateRanking("human", "draw");
+            await updateRanking("ai", "draw");
+            await game.save();
+            res.status(200).json(game);
+            return;
+        }
+
         if (game.currentPlayer === "O") { // la IA es "O"
             const aiMove = getAIMove(game.board, "O");
             if (aiMove) {
                 game.board[aiMove.row][aiMove.col] = "O";
-                game.currentPlayer = "X"; // Cambiar el turno
+                game.currentPlayer = "X";
 
                 result = checkWinner(game.board);
                 if (result) {
                     game.status = "finished";
                     game.winner = result === "draw" ? null : result;
+                    await updateRanking("ai", result === "draw" ? "draw" : "win");
+                    await updateRanking("human", result === "draw" ? "draw" : "loss");
                 }
             }
         }
